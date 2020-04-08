@@ -1,6 +1,8 @@
 const http = require('http');
 const fs = require('fs');
 
+
+
 const movies = [
     {
         original_title: "Joker",
@@ -194,42 +196,89 @@ const theaters = [
     }
 ];
 
+
 // Servidor
 http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    let encabezado, cuerpo, piePagina, titulosOrdenados, masVotadas,cines;
 
     // Route System
+
     switch (req.url) {
-        // Home
+
         case '/':
-            res.end('Home');
+
+            encabezado = 'Bienvenidos a DH Movies, el mejor sitio para encontrar las mejores películas, incluso mucho mejor que Netflix, Cuevana y PopCorn.\n\n';
+
+            cuerpo = 'Total de películas en cartelera:  ' + movies.length + '\n\nListado de Películas:\n';
+            titulosOrdenados = movies.map(movie => movie.title).sort();
+            titulosOrdenados.forEach((titulo) => cuerpo += `\t${titulo}\n`);
+
+            piePagina = '\nRecordá que podés visitar las secciones:\n\tEn Cartelera\n\tMás Votadas\n\tSucursales\n\tContacto\n\tPreguntas Frecuentes ';
+
+            res.write(encabezado + cuerpo + piePagina);
+            res.end();
             break;
-        // En cartelera
+
         case '/en-cartelera':
-            /*            let respuesta="";
-                       movies.forEach((movie)=>{
-                           respuesta=respuesta+ " "  + movie.title;
-                           console.log(movie);
-                       });
-            */
-            const titulos = movies.map(movie => movie.title).sort();
-            let respuesta = "";
-            titulos.forEach((titulo) => respuesta += titulo + "\n");
-            res.end(respuesta);
+
+            encabezado = 'En Cartelera.\n\n';
+
+            cuerpo = 'Total de películas en cartelera:  ' + movies.length + '\n\nListado de Películas:\n\n';
+            titulosOrdenados = movies.sort((a,b)=>a.title>b.title?1:b.title>a.title?-1:0);
+            titulosOrdenados.forEach((titulo) => cuerpo += `${titulo.title}\n\n\t${titulo.overview}\n\n\n\n`);
+
+            res.write(encabezado + cuerpo);
+            res.end();
             break;
+
         case '/mas-votadas':
-            res.end('Más Votadas');
+
+            encabezado = 'Más Votadas.\n\n';
+
+            masVotadas = movies.filter(movie=>movie.vote_average>=7).sort((a,b)=>a.vote_average<b.vote_average?1:b.vote_average<a.vote_average?-1:0);
+            cuerpo = 'Total de películas más votadas:  ' + masVotadas.length + '\n\nListado de Películas más votadas:\n\n';
+            masVotadas.forEach((movie) => cuerpo += `Título: ${movie.title}\nRating: ${movie.vote_average}\nReseña: ${movie.overview}\n\n\n\n`);
+
+            res.write(encabezado + cuerpo );
+            res.end();
             break;
+
         case '/sucursales':
-            res.end('Sucursales');
+
+            encabezado = 'Nuestras Salas.\n\n';
+
+            cines = theaters.sort((a,b)=>a.name>b.name?1:b.name>a.name?-1:0);
+            cuerpo = 'Total de Cines:  ' + cines.length + '\n\nListado de Cines:\n\n';
+            cines.forEach((cine) => cuerpo += `Nombre: ${cine.name}\nDirección: ${cine.address}\nDescripción: ${cine.description}\nCantidad de salas: ${cine.total_rooms}\n\n\n\n`);
+
+            res.write(encabezado + cuerpo);
+            res.end();
             break;
+
         case '/contacto':
-            res.end('Contacto');
+
+            encabezado = 'Contáctanos.\n\n';
+
+            cuerpo = '¿Tenés algo para contarnos? Nos encanta escuchar a nuestros clientes. \n';
+            cuerpo += 'Si deseas contactarnos podés escribirnos al siguiente email: dhmovies@digitalhouse.com o en las redes sociales. \n';
+            cuerpo += 'Envianos tu consulta, sugerencia o reclamo y será respondido a la brevedad posible.\n';
+            cuerpo += 'Recordá que también podes consultar la sección de Preguntas Frecuentes para obtener respuestas inmediatas a los problemas más comunes.\n';
+            res.write(encabezado + cuerpo);
+            res.end();
             break;
+
         case '/preguntas-frecuentes':
-            res.end('Preguntas Frecuentes');
-            break;
+
+           encabezado = 'Preguntas Frecuentes.\n\n';
+
+           cuerpo = 'Total de preguntas:  ' + faqs.length + '\n\nListado de preguntas:\n\n';
+           faqs.forEach((pregunta) => cuerpo += `Pregunta: ${pregunta.faq_title}\nRespuesta: ${pregunta.faq_answer}\n\n\n\n`);
+
+           res.write(encabezado + cuerpo);
+           res.end();
+           break;
         default:
             res.end('404 not found')
     }
-}).listen(3030, 'localhost', () => console.log('Server running in 3030 port'));
+}).listen(3030, '192.168.1.112', () => console.log('Server running in 3030 port'));
